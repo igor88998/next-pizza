@@ -1,10 +1,12 @@
-import { PaymentCallbackData } from '@/@types/stripe';
-import { prisma } from '@/prisma/prisma-client';
-import { OrderSuccessTemplate } from '@/shared/components/shared/email-templates/order-success';
-import { sendEmail } from '@/shared/lib';
-import { CartItemDTO } from '@/shared/services/dto/cart.dto';
-import { OrderStatus } from '@prisma/client';
-import { NextRequest, NextResponse } from 'next/server';
+"use client";
+
+import { PaymentCallbackData } from "@/@types/stripe";
+import { prisma } from "@/prisma/prisma-client";
+import { OrderSuccessTemplate } from "@/shared/components/shared/email-templates/order-success";
+import { sendEmail } from "@/shared/lib";
+import { CartItemDTO } from "@/shared/services/dto/cart.dto";
+import { OrderStatus } from "@prisma/client";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
 	try {
@@ -17,10 +19,10 @@ export async function POST(req: NextRequest) {
 		});
 
 		if (!order) {
-			return NextResponse.json({ error: 'Order not found' });
+			return NextResponse.json({ error: "Order not found" });
 		}
 
-		const isSucceeded = body.object.status === 'succeeded';
+		const isSucceeded = body.object.status === "succeeded";
 
 		await prisma.order.update({
 			where: {
@@ -36,12 +38,16 @@ export async function POST(req: NextRequest) {
 		if (isSucceeded) {
 			await sendEmail(
 				order.email,
-				'Next Pizza | Your order has been successfully placed',
-				OrderSuccessTemplate({ orderId: order.id, totalAmount: order.totalAmount, items })
+				"Next Pizza | Your order has been successfully placed",
+				OrderSuccessTemplate({
+					orderId: order.id,
+					totalAmount: order.totalAmount,
+					items,
+				})
 			);
-		} 
+		}
 	} catch (error) {
-		console.log('[Checkout Callback] Error', error);
-		return NextResponse.json({ error: 'Server error' });
+		console.log("[Checkout Callback] Error", error);
+		return NextResponse.json({ error: "Server error" });
 	}
 }
